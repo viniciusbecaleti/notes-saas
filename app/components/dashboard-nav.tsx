@@ -1,35 +1,18 @@
 'use client'
 
-import { CreditCard, HomeIcon, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
 
-const links = [
-  {
-    name: 'Home',
-    href: '/dashboard',
-    icon: HomeIcon,
-  },
-  {
-    name: 'Configurações',
-    href: '/dashboard/configuracoes',
-    icon: Settings,
-  },
-  {
-    name: 'Faturamento',
-    href: '/dashboard/faturamento',
-    icon: CreditCard,
-  },
-]
+import { dashboardLinks } from './user-nav'
 
 export function DashboardNav() {
   const pathname = usePathname()
 
   return (
     <ul className="grid items-start gap-2">
-      {links.map((link) => (
+      {dashboardLinks.map((link) => (
         <li key={link.href}>
           <Link href={link.href}>
             <span
@@ -38,7 +21,7 @@ export function DashboardNav() {
                 pathname === link.href && 'bg-accent',
               )}
             >
-              <link.icon className="mr-2 h-4 w-4" />
+              <link.icon className="mr-2 h-4 w-4 text-primary" />
               {link.name}
             </span>
           </Link>
