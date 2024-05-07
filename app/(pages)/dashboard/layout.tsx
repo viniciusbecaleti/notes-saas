@@ -2,19 +2,61 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { redirect } from 'next/navigation'
 
 import { DashboardNav } from '@/app/components/dashboard-nav'
+import prisma from '@/app/lib/prisma'
+
+async function getData({
+  id,
+  firstName,
+  lastName,
+  email,
+}: {
+  id: string
+  firstName: string | null | undefined
+  lastName: string | null | undefined
+  email: string
+}) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      stripeCustomerId: true,
+    },
+  })
+
+  if (!user) {
+    const name = `${firstName ?? ''} ${lastName ?? ''}`
+
+    await prisma.user.create({
+      data: {
+        id,
+        name,
+        email,
+      },
+    })
+  }
+}
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { isAuthenticated } = getKindeServerSession()
+  const { getUser } = getKindeServerSession()
 
-  const isUserAuthenticated = await isAuthenticated()
+  const user = await getUser()
 
-  if (!isUserAuthenticated) {
+  if (!user) {
     return redirect('/')
   }
+
+  await getData({
+    id: user.id as string,
+    firstName: user.given_name as string,
+    lastName: user.family_name as string,
+    email: user.email as string,
+  })
 
   return (
     <div className="mt-10 flex flex-col space-y-6">
