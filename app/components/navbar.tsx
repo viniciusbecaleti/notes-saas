@@ -25,6 +25,8 @@ export async function Navbar() {
         </Link>
 
         <div className="flex items-center gap-x-5">
+          <ThemeToggle />
+
           <div className="flex items-center gap-x-5">
             {isUserAuthenticated && (
               <LogoutLink>
@@ -43,8 +45,6 @@ export async function Navbar() {
               </>
             )}
           </div>
-
-          <ThemeToggle />
         </div>
       </div>
     </nav>
