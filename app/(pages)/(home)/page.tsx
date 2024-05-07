@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button'
 export default async function Home() {
   const { isAuthenticated } = getKindeServerSession()
 
-  const isUserLoggedIn = await isAuthenticated()
+  const isUserAuthenticated = await isAuthenticated()
 
-  if (isUserLoggedIn) {
+  if (isUserAuthenticated) {
     return redirect('/dashboard')
   }
 
