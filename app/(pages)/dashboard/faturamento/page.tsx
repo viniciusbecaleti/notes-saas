@@ -1,6 +1,9 @@
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { CheckCircle2 } from 'lucide-react'
+import { redirect } from 'next/navigation'
 
 import prisma from '@/app/lib/prisma'
+import { getStripeSession } from '@/app/lib/stripe'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -41,6 +44,27 @@ async function getData({ userId }: { userId: string }) {
 }
 
 export default async function DashboardFaturamento() {
+  const { getUser } = getKindeServerSession()
+
+  const user = await getUser()
+  const data = await getData({ userId: user?.id as string })
+
+  async function createSubscription() {
+    'use server'
+
+    if (!data?.user.stripeCustomerId) {
+      throw new Error('Usuário não possui um stripeCustomerId')
+    }
+
+    const subscriptionUrl = await getStripeSession({
+      customerId: data.user.stripeCustomerId,
+      domainUrl: 'http://localhost:3000',
+      priceId: process.env.STRIPE_PRICE_ID as string,
+    })
+
+    return redirect(subscriptionUrl)
+  }
+
   return (
     <div className="mx-auto max-w-md space-y-4">
       <Card className="flex flex-col">
@@ -73,7 +97,7 @@ export default async function DashboardFaturamento() {
             ))}
           </ul>
 
-          <form className="w-full">
+          <form className="w-full" action={createSubscription}>
             <Button className="w-full" type="submit">
               Comprar agora
             </Button>
