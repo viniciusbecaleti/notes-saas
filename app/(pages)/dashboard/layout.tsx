@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { DashboardNav } from '@/app/components/dashboard-nav'
 import prisma from '@/app/lib/prisma'
+import { stripe } from '@/app/lib/stripe'
 
 async function getData({
   id,
@@ -33,6 +34,21 @@ async function getData({
         id,
         name,
         email,
+      },
+    })
+  }
+
+  if (!user?.stripeCustomerId) {
+    const { id: stripeId } = await stripe.customers.create({
+      email,
+    })
+
+    await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        stripeCustomerId: stripeId,
       },
     })
   }
