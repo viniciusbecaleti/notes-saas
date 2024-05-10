@@ -197,7 +197,10 @@ export default async function DashboardConfiguracoes() {
           </CardContent>
 
           <CardFooter>
-            <SubmitButton />
+            <SubmitButton
+              defaultText="Salvar agora"
+              textLoading="Por favor, aguarde"
+            />
           </CardFooter>
         </form>
       </Card>

@@ -2,9 +2,9 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { CheckCircle2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
+import { SubmitButton } from '@/app/components/submit-button'
 import prisma from '@/app/lib/prisma'
 import { getStripeSession } from '@/app/lib/stripe'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 const featureItems = [
@@ -25,39 +25,48 @@ const featureItems = [
   },
 ]
 
-async function getData({ userId }: { userId: string }) {
-  const data = await prisma.subscription.findUnique({
-    where: {
-      userId,
-    },
-    select: {
-      status: true,
-      user: {
-        select: {
-          stripeCustomerId: true,
-        },
-      },
-    },
-  })
+// async function getData({ userId }: { userId: string }) {
+//   const data = await prisma.subscription.findUnique({
+//     where: {
+//       userId,
+//     },
+//     select: {
+//       status: true,
+//       user: {
+//         select: {
+//           stripeCustomerId: true,
+//         },
+//       },
+//     },
+//   })
 
-  return data
-}
+//   return data
+// }
 
 export default async function DashboardFaturamento() {
   const { getUser } = getKindeServerSession()
 
   const user = await getUser()
-  const data = await getData({ userId: user?.id as string })
+  // const data = await getData({ userId: user?.id as string })
 
   async function createSubscription() {
     'use server'
 
-    if (!data?.user.stripeCustomerId) {
+    const dbUser = await prisma.user.findUnique({
+      where: {
+        id: user?.id,
+      },
+      select: {
+        stripeCustomerId: true,
+      },
+    })
+
+    if (!dbUser?.stripeCustomerId) {
       throw new Error('Usuário não possui um stripeCustomerId')
     }
 
     const subscriptionUrl = await getStripeSession({
-      customerId: data.user.stripeCustomerId,
+      customerId: dbUser.stripeCustomerId,
       domainUrl: 'http://localhost:3000',
       priceId: process.env.STRIPE_PRICE_ID as string,
     })
@@ -98,9 +107,11 @@ export default async function DashboardFaturamento() {
           </ul>
 
           <form className="w-full" action={createSubscription}>
-            <Button className="w-full" type="submit">
-              Comprar agora
-            </Button>
+            <SubmitButton
+              defaultText="Assinar"
+              textLoading="Por favor, aguarde"
+              className="w-full"
+            />
           </form>
         </div>
       </Card>

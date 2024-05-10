@@ -30,7 +30,7 @@ export const getStripeSession = async ({
       name: 'auto',
     },
     success_url: `${domainUrl}/pagamento/sucesso`,
-    cancel_url: `${domainUrl}/p agamento/cancelado`,
+    cancel_url: `${domainUrl}/pagamento/cancelado`,
   })
 
   return session.url as string
